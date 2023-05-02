@@ -5,6 +5,7 @@ import pygame
 from dino_runner.utils.constants import DUCKING, JUMPING, RUNNING
 
 JUMP_VELOCITY = 8.5
+DUCKING_POS = 340
 DINO_RUN = "running"
 DINO_JUMPING = "jumping"
 DINO_DUCKING = "ducking"
@@ -55,11 +56,13 @@ class Dinosaur(Sprite):
             self.jump_velocity = JUMP_VELOCITY
 
     def run(self):
+        self.rect.y = self.POS_y
         self.image = RUNNING[0] if self.step < 5 else RUNNING[1]
         self.step += 1
+        
 
     def duck(self):
-        self.rect.y = 330
+        self.rect.y = DUCKING_POS
         self.image = DUCKING[0] if self.step < 5 else DUCKING[1]
         self.step += 1
         
