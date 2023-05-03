@@ -2,6 +2,7 @@ import pygame
 from dino_runner.components.Score import Score
 
 from dino_runner.components.dinosau import Dinosaur
+from dino_runner.components.inBoard import In_Board
 
 from dino_runner.components.obstacles.obstacleManager import ObstacleManager
 
@@ -23,6 +24,7 @@ class Game:
         self.player = Dinosaur()
         self.obstacle_manager = ObstacleManager()
         self.score = Score()
+        self.inBoard = In_Board()
         self.death_count = 0
 
     def run(self):
@@ -77,20 +79,17 @@ class Game:
         pygame.time.delay(500)
         self.playing = False
         self.death_count += 1
+        self.score.reset()
 
     def show_menu(self):
-        center_x = SCREEN_WIDTH // 2
-        center_y = SCREEN_HEIGHT // 2
         self.screen.fill((255, 255, 255))
         if self.death_count == 0:
-            font = pygame.font.Font("freesansbold.ttf", 30)
-            text = font.render("Press any key to start", True, (0,0,0))
-            text_rect = text.get_rect()
-            text_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-            self.screen.blit(text, text_rect)
-            self.screen.blit(DINO_START, (center_x - 49, center_y - 131))
+            self.inBoard.board_play(SCREEN_WIDTH // 2 ,SCREEN_HEIGHT // 2)
         else:
-            pass
+            self.inBoard.board_reset(SCREEN_WIDTH // 2 ,SCREEN_HEIGHT // 2)
+            self.inBoard.board_score()
+            self.board_death_count()
+            
 
 
         pygame.display.update()
@@ -102,6 +101,14 @@ class Game:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 self.play()
+
+    
+    def board_death_count(self):
+        font = pygame.font.Font("freesansbold.ttf", 25)
+        text = font.render(f"Your deaths:  {self.death_count}", True, (0,0,0))
+        text_rect = text.get_rect()
+        text_rect.center = (700, 500)    
+        self.screen.blit(text, text_rect)
 
 
 
