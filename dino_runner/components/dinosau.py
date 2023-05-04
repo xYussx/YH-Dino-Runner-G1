@@ -2,7 +2,7 @@ from pygame.sprite import Sprite
 
 import pygame
 
-from dino_runner.utils.constants import DEFAULT_TYPE, DUCKING, DUCKING_SHIELD, JUMPING, JUMPING_SHIELD, RUNNING, RUNNING_SHIELD, SHIELD_TYPE
+from dino_runner.utils.constants import DEFAULT_TYPE, DUCKING, DUCKING_HAMMER, DUCKING_SHIELD, HAMMER_TYPE, JUMPING, JUMPING_HAMMER, JUMPING_SHIELD, RUNNING, RUNNING_HAMMER, RUNNING_SHIELD, SHIELD_TYPE
 from dino_runner.utils.text import draw_message
 
 JUMP_VELOCITY = 8.5
@@ -10,9 +10,9 @@ DINO_RUN = "running"
 DINO_JUMPING = "jumping"
 DINO_DUCKING = "ducking"
 
-DUCKING_IMG = {DEFAULT_TYPE: DUCKING, SHIELD_TYPE: DUCKING_SHIELD}
-RUNNING_IMG = {DEFAULT_TYPE: RUNNING, SHIELD_TYPE: RUNNING_SHIELD}
-JUMPING_IMG = {DEFAULT_TYPE: JUMPING, SHIELD_TYPE: JUMPING_SHIELD}
+DUCKING_IMG = {DEFAULT_TYPE: DUCKING, SHIELD_TYPE: DUCKING_SHIELD, HAMMER_TYPE: DUCKING_HAMMER}
+RUNNING_IMG = {DEFAULT_TYPE: RUNNING, SHIELD_TYPE: RUNNING_SHIELD, HAMMER_TYPE: RUNNING_HAMMER}
+JUMPING_IMG = {DEFAULT_TYPE: JUMPING, SHIELD_TYPE: JUMPING_SHIELD, HAMMER_TYPE: JUMPING_HAMMER}
 
 
 class Dinosaur(Sprite):
@@ -54,13 +54,23 @@ class Dinosaur(Sprite):
 
             
     def jump(self):
-        pos_y = self.rect.y - self.jump_velocity * 4
-        self.update_image(JUMPING_IMG[self.type], pos_y=pos_y)
-        self.jump_velocity -= 0.8
-        if self.jump_velocity < -JUMP_VELOCITY:
-            self.rect.y = self.POS_y
-            self.action = DINO_RUN
-            self.jump_velocity = JUMP_VELOCITY
+        is_floating = self.type == HAMMER_TYPE
+        if not is_floating:
+            pos_y = self.rect.y - self.jump_velocity * 4
+            self.update_image(JUMPING_IMG[self.type], pos_y=pos_y)
+            self.jump_velocity -= 0.8
+            if self.jump_velocity < -JUMP_VELOCITY:
+                self.rect.y = self.POS_y
+                self.action = DINO_RUN
+                self.jump_velocity = JUMP_VELOCITY
+        else:
+            pos_y = self.rect.y - self.jump_velocity * 4
+            self.update_image(JUMPING_IMG[self.type], pos_y=pos_y)
+            self.jump_velocity -= 0.5
+            if self.jump_velocity < -JUMP_VELOCITY:
+                self.rect.y = self.POS_y
+                self.action = DINO_RUN
+                self.jump_velocity = JUMP_VELOCITY
 
     def run(self):
         self.update_image(RUNNING_IMG[self.type][self.step // 5])
