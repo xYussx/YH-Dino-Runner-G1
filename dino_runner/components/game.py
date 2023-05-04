@@ -2,11 +2,12 @@ import pygame
 from dino_runner.components.Score import Score
 
 from dino_runner.components.dinosau import Dinosaur
-from dino_runner.components.inBoard import In_Board
+from dino_runner.components.inBoard import  InBoard
 
 from dino_runner.components.obstacles.obstacleManager import ObstacleManager
+from dino_runner.components.power_ups.power_up_manager import PowerUpManager
 
-from dino_runner.utils.constants import BG, DINO_START, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS
+from dino_runner.utils.constants import BG, DINO_START, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, SHIELD_TYPE, TITLE, FPS
 
 
 class Game:
@@ -24,8 +25,9 @@ class Game:
         self.player = Dinosaur()
         self.obstacle_manager = ObstacleManager()
         self.score = Score()
-        self.inBoard = In_Board()
+        self.inBoard = InBoard()
         self.death_count = 0
+        self.power_up_manager = PowerUpManager()
 
     def run(self):
         self.running = True
@@ -36,12 +38,18 @@ class Game:
         pygame.quit()
 
     def play(self):
-        self.playing = True
-        self.obstacle_manager.reset()
+        self.reset_game()
         while self.playing:
             self.events()
             self.update()
             self.draw()
+    
+    def reset_game(self):
+        self.playing = True
+        self.game_speed = 20
+        self.score.reset()
+        self.power_up_manager.reset()
+        self.obstacle_manager.reset()
 
 
     def events(self):
@@ -55,6 +63,7 @@ class Game:
         self.player.update(user_input)
         self.obstacle_manager.update(self.game_speed,self.player,self.on_death )
         self.score.update(self)
+        self.power_up_manager.update(self.game_speed, self.score.score, self.player )
 
     def draw(self):
         self.clock.tick(FPS)
@@ -63,6 +72,8 @@ class Game:
         self.player.draw(self.screen)
         self.obstacle_manager.draw(self.screen)
         self.score.draw(self.screen)
+        self.power_up_manager.draw(self.screen)
+        self.player.draw_power_up(self.screen)
         pygame.display.update()
         pygame.display.flip()
 
@@ -76,10 +87,12 @@ class Game:
         self.x_pos_bg -= self.game_speed
 
     def on_death(self):
-        pygame.time.delay(500)
-        self.playing = False
-        self.death_count += 1
-        self.score.reset()
+        is_invincible = self.player.type == SHIELD_TYPE
+        if not is_invincible:
+            pygame.time.delay(500)
+            self.playing = False
+            self.death_count += 1
+        
 
     def show_menu(self):
         self.screen.fill((255, 255, 255))
@@ -87,8 +100,9 @@ class Game:
             self.inBoard.board_play(SCREEN_WIDTH // 2 ,SCREEN_HEIGHT // 2)
         else:
             self.inBoard.board_reset(SCREEN_WIDTH // 2 ,SCREEN_HEIGHT // 2)
-            self.inBoard.board_score()
+            self.inBoard.board_score(self.score.score)
             self.board_death_count()
+            self.inBoard.board_max_score(self.score.max_score)
             
 
 
@@ -107,7 +121,7 @@ class Game:
         font = pygame.font.Font("freesansbold.ttf", 25)
         text = font.render(f"Your deaths:  {self.death_count}", True, (0,0,0))
         text_rect = text.get_rect()
-        text_rect.center = (700, 500)    
+        text_rect.center = (700, 400)    
         self.screen.blit(text, text_rect)
 
 
